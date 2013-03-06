@@ -1,0 +1,235 @@
+﻿// Guild Wars 2 Xbox Controller
+// bob <bob@catch404.net> 20130305
+// loosely based on the version by Disapproval@GW2
+
+/***
+**** Main Buttons **************************************************************
+
+X     = 1 (mainhand spell)
+Y     = 2 (mainhand spell)
+B     = 3 (mainhand spell)
+A     = Space (jump)
+Start = M (map)
+Back  = X (sheath / brandish weapon)
+
+RT + X     = 4 (offhand spell)
+RT + Y     = 5 (offhand spell)
+RT + B     = 6 (heal)
+RT + A     = ----
+RT + Start = ----
+RT + Back  = ----
+
+LT + X     = 7 (skill slot)
+LT + Y     = 8 (skill slot)
+LT + B     = 9 (skill slot)
+LT + A     = 0 (elite skill)
+LT + Start = ----
+LT + Back  = = (toggle run/walk)
+
+
+**** Bumpers *******************************************************************
+
+LB = V (dodge)
+RB = F (activate / use / loot)
+
+RT + LB = ----
+RT + RB = ----
+
+LT + LB = ~ (weapon switch)
+LT + RB = Escape (cancel)
+
+**** The Sticks ****************************************************************
+
+Left Stick = Arrows (move)
+Right Stick = Mouse (camera move)
+
+LS = / (my mumble ppt)
+RS = Tab (target nearest enemy)
+
+RT + LS = ----
+RT + RS (target marked target)
+
+LT + LS = PgUp (zoom in)
+LT + RS = PgDn (zoom out)
+
+********************************************************************************
+***/
+
+////////////////////////////////////////////////////////////////////////////////
+// configuration area //////////////////////////////////////////////////////////
+
+// to change a gamepad button (or combo) find the Key.Whatever = line you want
+// and change the Key.Whatever to Key.SomethingElse.
+
+// to make camera movement faster reduce the number dividing the screen width.
+// to to make camera movement slower, make it larger. 160 works well on 1080p
+// for me. any faster and jumping puzzles become bothersome.
+
+var.MouseSensitivity = (screen.width/160);
+
+// adjust the deadzones of the sticks. by default you'll have to push the left
+// stick 40% of the way before it will begin pushing buttons for you as guild
+// wars has no incremental movement support. the right stick moves the camera
+// and does support pushing a little = turning slower, the deadzone is to allow
+// for slack in your gamepad mostly and defaults to 20%.
+
+var.LeftStickDeadZone = 0.40;
+var.RightStickDeadZone = 0.20;
+
+////////////////////////////////////////////////////////////////////////////////
+// mod shortcuts ///////////////////////////////////////////////////////////////
+
+// these things actually get updated every event so they will some pretty nice
+// shortcuts to make the rest of the script easier.
+var.LeftMod = XInput.LeftTrigger and !XInput.RightTrigger;  // only left down
+var.RightMod = XInput.RightTrigger and !XInput.LeftTrigger; // only right dpwm
+var.NoMod = !(XInput.LeftTrigger or XInput.RightTrigger);   // neither down
+var.BothMod = XInput.LeftTrigger and XInput.RightTrigger;   // both down
+
+// show if we have moved the sticks enough to trip them into doing something.
+var.RightStickTripped = DeadZone(XInput.RightStickX,var.RightStickDeadZone) or DeadZone(XInput.RightStickY,var.RightStickDeadZone);
+var.LeftStickTripped = DeadZone(XInput.LeftStickX,var.LeftStickDeadZone) or DeadZone(XInput.LeftStickY,var.LeftStickDeadZone);
+
+////////////////////////////////////////////////////////////////////////////////
+// movement (axis threshold) ///////////////////////////////////////////////////
+
+Key.Up    = (DeadZone(XInput.LeftStickY,var.LeftStickDeadZone) > 0);
+Key.Down  = (DeadZone(XInput.LeftStickY,var.LeftStickDeadZone) < 0);
+Key.Right = (DeadZone(XInput.LeftStickX,var.LeftStickDeadZone) > 0);
+Key.Left  = (DeadZone(XInput.LeftStickX,var.LeftStickDeadZone) < 0);
+
+////////////////////////////////////////////////////////////////////////////////
+// camera (axis threshhold) ////////////////////////////////////////////////////
+
+if(var.RightStickTripped) {
+
+    // throw the cursor cursor right above the center of the screen for aoe
+    // targeting and then hold down the right mouse.
+    if(!mouse.RightButton) {
+        Mouse.CursorPosX = screen.Width/2;
+        Mouse.CursorPosY = screen.Height/2.5;
+        mouse.RightButton = 1;
+    }
+
+    // adjust cursor right
+    if(XInput.RightStickY > 0) {
+        mouse.DirectInputY += var.MouseSensitivity^(XInput.RightStickY);
+    }
+
+    // adjust cursor left
+    if(XInput.RightStickY < 0) {
+        mouse.DirectInputY -= -var.MouseSensitivity^1*(XInput.RightStickY);
+    }
+
+    // adjust cursor down
+    if(XInput.RightStickX > 0) {
+       mouse.DirectInputX += var.MouseSensitivity^(XInput.RightStickX);
+    }
+
+    // adjust cursor up
+    if(XInput.RightStickX < 0) {
+       mouse.DirectInputX -= -var.MouseSensitivity^1*(XInput.RightStickX);
+    }
+
+} else {
+
+    // release the right click if we have it.
+    // disabled because guild wars is being bad and sometimes changing target
+    // on mouse up. therefore once the camera has been moved right click will
+    // be held down. to release it, you're going to have to reach up and right
+    // click the mouse for real before you'll get the pointer back.
+
+    // https://forum-en.guildwars2.com/forum/game/suggestions/An-option-to-disable-right-click-targeting/page/1
+
+    // if(mouse.RightButton) {
+    //   mouse.RightButton = 0;
+    // }
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// primary actions /////////////////////////////////////////////////////////////
+
+// (X) 1 (mainhand)
+Key.1 = XInput.X and var.NoMod;
+
+// (Y) 2 (mainhand)
+Key.2 = XInput.Y and var.NoMod;
+
+// (B) 3 (mainhand)
+Key.3 = XInput.B and var.NoMod;
+
+// [RT]+(X) 4 (offhand)
+Key.4 = XInput.X and var.RightMod;
+
+// [RT]+(Y) 5 (offhand)
+Key.5 = XInput.Y and var.RightMod;
+
+// [RT]+(B) 6 (heal)
+Key.6 = XInput.B and var.RightMod;
+
+////////////////////////////////////////////////////////////////////////////////
+// secondary actions ///////////////////////////////////////////////////////////
+
+// [LT]+(X) 7 (skill slot)
+Key.7 = XInput.X and var.LeftMod;
+
+// [LT]+(Y) 8 (skill slot)
+Key.8 = XInput.Y and var.LeftMod;
+
+// [LT]+(B) 9 (skill slot)
+Key.9 = XInput.B and var.LeftMod;
+
+// [LT]+(A) 0 (epic skill)
+Key.0 = XInput.A and var.LeftMod;
+
+////////////////////////////////////////////////////////////////////////////////
+// skills bar //////////////////////////////////////////////////////////////////
+
+Key.F1 = XInput.Left  and var.NoMod;
+Key.F2 = XInput.Up    and var.NoMod;
+Key.F3 = XInput.Right and var.NoMod;
+Key.F4 = XInput.Down  and var.NoMod;
+
+////////////////////////////////////////////////////////////////////////////////
+// commands ////////////////////////////////////////////////////////////////////
+
+// (Start) (map)
+Key.M = XInput.Start              and var.NoMod;
+
+// (Back) (sheath / brandish)
+Key.X = XInput.Back               and var.NoMod;
+
+// [LT]+(Back) (run/walk)
+Key.Equals = XInput.Back          and var.LeftMod;
+
+// (A) (jump)
+Key.Spacebar = XInput.A           and var.NoMod;
+
+// [LB] (dodge)
+Key.V = XInput.LeftShoulder       and var.NoMod;
+
+// [LT]+[LB] (weapon switch)
+Key.Console = XInput.LeftShoulder and var.LeftMod;
+
+// [RB] (activate/talk/use)
+Key.F = XInput.RightShoulder      and var.NoMod;
+
+// [LT]+[RB] (cancel)
+Key.Escape = XInput.RightShoulder and var.LeftMod;
+
+// (RS) (target whatever enemy)
+Key.Tab = XInput.RightThumb       and var.NoMod;
+
+// [RT]+(RS) (target assist)
+Key.NumPadDot = XInput.RightThumb and var.RightMod;
+
+// (LS) (mumble ppt)
+Key.Slash = XInput.LeftThumb      and var.NoMod;
+
+// [LT]+(LS) (zoom in)
+Key.PageUp = XInput.LeftThumb     and var.LeftMod;
+
+// [LT]+(RS) (zoom out)
+Key.PageDown = XInput.RightThumb  and var.LeftMod;
+
