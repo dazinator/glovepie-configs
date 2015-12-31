@@ -1,6 +1,7 @@
-﻿// Guild Wars 2 Xbox Controller
-// bob <bob@catch404.net> 20130305
-// loosely based on the version by Disapproval@GW2
+// Guild Wars 2 Xbox Controller
+// based on the version by bobmajdakjr
+// minor alterations for individual y / x sensitivity,
+// added target nearest ally.
 
 /***
 **** Main Buttons **************************************************************
@@ -23,7 +24,7 @@ LT + X     = 7 (skill slot)
 LT + Y     = 8 (skill slot)
 LT + B     = 9 (skill slot)
 LT + A     = 0 (elite skill)
-LT + Start = ----
+LT + Start = I (inventory)
 LT + Back  = = (toggle run/walk)
 
 
@@ -43,7 +44,7 @@ LT + RB = Escape (cancel)
 Left Stick = Arrows (move)
 Right Stick = Mouse (camera move)
 
-LS = / (my mumble ppt)
+LS = U (my target nearest ally)
 RS = Tab (target nearest enemy)
 
 RT + LS = ----
@@ -65,7 +66,8 @@ LT + RS = PgDn (zoom out)
 // to to make camera movement slower, make it larger. 160 works well on 1080p
 // for me. any faster and jumping puzzles become bothersome.
 
-var.MouseSensitivity = (screen.width/160);
+var.MouseSensitivityY = (screen.width/160);
+var.MouseSensitivityX = (screen.Height/220);
 
 // adjust the deadzones of the sticks. by default you'll have to push the left
 // stick 40% of the way before it will begin pushing buttons for you as guild
@@ -113,22 +115,22 @@ if(var.RightStickTripped) {
 
     // adjust cursor right
     if(XInput.RightStickY > 0) {
-        mouse.DirectInputY += var.MouseSensitivity^(XInput.RightStickY);
+        mouse.DirectInputY -= var.MouseSensitivityY^(XInput.RightStickY);
     }
 
     // adjust cursor left
     if(XInput.RightStickY < 0) {
-        mouse.DirectInputY -= -var.MouseSensitivity^1*(XInput.RightStickY);
+        mouse.DirectInputY += -var.MouseSensitivityY^1*(XInput.RightStickY);
     }
 
     // adjust cursor down
     if(XInput.RightStickX > 0) {
-       mouse.DirectInputX += var.MouseSensitivity^(XInput.RightStickX);
+       mouse.DirectInputX += var.MouseSensitivityX^(XInput.RightStickX);
     }
 
     // adjust cursor up
     if(XInput.RightStickX < 0) {
-       mouse.DirectInputX -= -var.MouseSensitivity^1*(XInput.RightStickX);
+       mouse.DirectInputX -= -var.MouseSensitivityX^1*(XInput.RightStickX);
     }
 
 } else {
@@ -197,6 +199,9 @@ Key.F4 = XInput.Down  and var.NoMod;
 // (Start) (map)
 Key.M = XInput.Start              and var.NoMod;
 
+// [LT]+(Start) (inventory)
+Key.I = XInput.Start              and var.LeftMod;
+
 // (Back) (sheath / brandish)
 Key.X = XInput.Back               and var.NoMod;
 
@@ -224,8 +229,8 @@ Key.Tab = XInput.RightThumb       and var.NoMod;
 // [RT]+(RS) (target assist)
 Key.NumPadDot = XInput.RightThumb and var.RightMod;
 
-// (LS) (mumble ppt)
-Key.Slash = XInput.LeftThumb      and var.NoMod;
+// (LS) (target nearest ally requires U binding in the in-game control options screen)
+Key.U = XInput.LeftThumb      and var.NoMod;
 
 // [LT]+(LS) (zoom in)
 Key.PageUp = XInput.LeftThumb     and var.LeftMod;
